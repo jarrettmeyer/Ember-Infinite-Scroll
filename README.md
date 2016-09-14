@@ -4,6 +4,10 @@ A super simple infinite scroll example in [Ember](http://www.emberjs.org).
 
 ## To Run
 
+This can be run from [RawGit](https://rawgit.com/jarrettmeyer/Ember-Infinite-Scroll/master/public/index.html).
+
+## To Run on Your Machine
+
 I used [http-server](https://www.npmjs.com/package/http-server), but feel free to
 use whatever simple web server you like.
 
