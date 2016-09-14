@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ember Infinite Scroll</title>
+  <link href="css/app.css" rel="stylesheet"/>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ember.js/2.8.0/ember.debug.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ember.js/2.8.0/ember-template-compiler.js"></script>
+</head>
+<body>
+  <h1>Ember Infinite Scroll</h1>
+
+  <script type="text/x-handlebars">
+    {{outlet}}
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="index">
+    <ul>
+      {{#each model as |row|}}
+        <li>{{row.counter}}</li>
+      {{/each}}
+    </ul>
+  </script>
+
+  <script type="text/javascript" src="javascript/app.js"></script>
+
+</body>
