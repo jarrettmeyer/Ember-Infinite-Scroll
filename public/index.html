@@ -9,9 +9,9 @@
 </head>
 <body>
   <h1>Ember Infinite Scroll</h1>
-  
+
   <p>
-    This is a demo for a very simple Ember Infinite Scroll mixin. Check out the full source code at 
+    This is a demo for a very simple Ember Infinite Scroll mixin. Check out the full source code at
     <a href="https://github.com/jarrettmeyer/Ember-Infinite-Scroll">github.com/jarrettmeyer/Ember-Infinite-Scroll</a>.
   </p>
 
@@ -20,6 +20,9 @@
   </script>
 
   <script type="text/x-handlebars" data-template-name="index">
+    <p>
+      Currently loaded {{model.length}} of {{maxRecords}} records.
+    </p>
     <ul>
       {{#each model as |row|}}
         <li>{{row.counter}}</li>

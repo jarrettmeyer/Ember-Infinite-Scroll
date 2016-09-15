@@ -2,11 +2,31 @@ var App = Ember.Application.create();
 var Router = Ember.Router.map(function () {
 });
 
+/**
+ * Number of records to fetch from the API for the initial data load.
+ */
+var INITIAL_FETCH = 50;
 
+/**
+ * Maximum number of records to fetch from the API. This will let us test the
+ * feature where no records are returned from the API.
+ */
 var MAX_RECORDS = 310;
 
+/**
+ * Default page size.
+ */
+var PAGE_SIZE = 50;
 
-function fetchData(skip, take) {
+
+/**
+ * You will need to write your own function to fetch data from your API.
+ */
+function fetchData(options) {
+  options = options || {};
+  var skip = options.skip || 0;
+  var take = options.take || PAGE_SIZE;
+  console.log('Fetching data, skip: ' + skip + ', take: ' + take + '.');
   var rows = Ember.A([]);
   for (var i = skip; i < skip + take && i < MAX_RECORDS; i++) {
     var row = { counter: i + 1 };
@@ -19,7 +39,7 @@ function fetchData(skip, take) {
 App.IndexRoute = Ember.Route.extend({
 
   model: function () {
-    return fetchData(0, 50);
+    return fetchData({ skip: 0, take: INITIAL_FETCH });
   }
 
 });
@@ -44,13 +64,14 @@ App.InfiniteScroll = Ember.Mixin.create({
    * two arguments: `skip` and `take`. The function should return a promise of
    * new records from your API.
    */
-  loadData: function (/* skip, take */) {
+  loadData: function (/* options */) {
     console.error('Must overwrite loadData in controller.');
   },
 
   /**
    * Value is `true` if new records were returned from the most recent API call.
-   * Otherwise, `false`.
+   * Otherwise, `false`. If `_hasNewRecords` is false, no new attempts to fetch
+   * data will be made.
    */
   _hasNewRecords: true,
 
@@ -83,16 +104,23 @@ App.InfiniteScroll = Ember.Mixin.create({
   }.on('init'),
 
   /**
-   * Callback when scrolling threshold is reached.
+   * Callback when scrolling threshold is reached. Do not attempt to load data if
+   * we are already in the process of loading data or if no records were returned
+   * from the server on our previous attempts.
    */
   _onScroll: function () {
     if (this.get('_isLoadingData')) {
       return;
     }
+    if (!this.get('_hasNewRecords')) {
+      return;
+    }
     this.set('_isLoadingData', true);
-    var recordCount = this.get('model.length');
-    var pageSize = this.get('pageSize');
-    return this.get('loadData')(recordCount, pageSize).then(this.get('_afterLoadingData').bind(this));
+    var loadDataOptions = {
+      skip: this.get('model.length'),
+      take: this.get('pageSize')
+    };
+    return this.get('loadData')(loadDataOptions).then(this.get('_afterLoadingData').bind(this));
   },
 
   /**
@@ -124,13 +152,19 @@ App.InfiniteScroll = Ember.Mixin.create({
 });
 
 
+/**
+ * This will be your controller. You will need to write your own `loadData`
+ * function. You may overwrite the `pageSize` and `threshold` variables in your
+ * controller.
+ */
 App.IndexController = Ember.Controller.extend(App.InfiniteScroll, {
 
+  maxRecords: MAX_RECORDS,
   pageSize: 25,
   threshold: 0.80,
 
-  loadData: function (skip, take) {
-    return fetchData(skip, take);
+  loadData: function (options) {
+    return fetchData(options);
   }
 
 });
