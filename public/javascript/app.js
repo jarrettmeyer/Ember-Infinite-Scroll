@@ -110,9 +110,9 @@ App.InfiniteScroll = Ember.Mixin.create({
    * be loaded from the API.
    */
   _ensureScrollbarsVisible: function () {
-    var windowHeight = Ember.$(window).height();
-    var documentHeight = Ember.$(document).height();
     var _this = this;
+    var windowHeight = _this.get('_$window').height();
+    var documentHeight = _this.get('_$document').height();
     Ember.run.schedule('afterRender', function () {
       if (windowHeight >= documentHeight) {
         _this.get('_onScroll').bind(_this)();
@@ -158,9 +158,9 @@ App.InfiniteScroll = Ember.Mixin.create({
     var _this = this;
     var threshold = this.get('_threshold');
     Ember.$(window).on('scroll', function () {
-      var topPosition = Ember.$(window).scrollTop();
-      var docHeight = Ember.$(document).height();
-      var windowHeight = Ember.$(window).height();
+      var topPosition = _this.get('_$window').scrollTop();
+      var docHeight = _this.get('_$document').height();
+      var windowHeight = _this.get('_$window').height();
       var heightDiff = docHeight - windowHeight;
       var loadPosition = Math.floor(threshold * heightDiff);
       if (topPosition >= loadPosition) {
@@ -175,6 +175,14 @@ App.InfiniteScroll = Ember.Mixin.create({
       return threshold;
     }
     return 1.00;
+  }),
+
+  _$document: Ember.computed(function () {
+    return Ember.$(document);
+  }),
+
+  _$window: Ember.computed(function () {
+    return Ember.$(window);
   })
 
 });
