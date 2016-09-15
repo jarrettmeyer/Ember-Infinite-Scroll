@@ -5,7 +5,12 @@ var Router = Ember.Router.map(function () {
 /**
  * Number of records to fetch from the API for the initial data load.
  */
-var INITIAL_FETCH = 50;
+var INITIAL_FETCH = 25;
+
+/**
+ * Simulate a delay to load data from the server.
+ */
+var LOAD_DELAY = 1000; // in ms
 
 /**
  * Maximum number of records to fetch from the API. This will let us test the
@@ -20,19 +25,24 @@ var PAGE_SIZE = 50;
 
 
 /**
- * You will need to write your own function to fetch data from your API.
+ * You will need to write your own function to fetch data from your API. As usual,
+ * your function to load data needs to return a promise.
  */
 function fetchData(options) {
   options = options || {};
   var skip = options.skip || 0;
   var take = options.take || PAGE_SIZE;
-  console.log('Fetching data, skip: ' + skip + ', take: ' + take + '.');
-  var rows = Ember.A([]);
-  for (var i = skip; i < skip + take && i < MAX_RECORDS; i++) {
-    var row = { counter: i + 1 };
-    rows.pushObject(row);
-  }
-  return Ember.RSVP.resolve(rows);
+  console.log('Simulate fetching data, skip: ' + skip + ', take: ' + take + '.');
+  return new Ember.RSVP.Promise(function (resolve) {
+    setTimeout(function () {
+      var rows = Ember.A([]);
+      for (var i = skip; i < skip + take && i < MAX_RECORDS; i++) {
+        var row = { counter: i + 1 };
+        rows.pushObject(row);
+      }
+      return resolve(rows);
+    }, LOAD_DELAY);
+  });
 }
 
 
@@ -90,6 +100,24 @@ App.InfiniteScroll = Ember.Mixin.create({
       this.set('_hasNewRecords', false);
     }
     this.get('model').pushObjects(newRecords);
+    this.get('_ensureScrollbarsVisible').bind(this)();
+  },
+
+  /**
+   * If the window height is greater than or equal to the document height, then
+   * no scroll bars will be visible. If there are no scroll bars, then there will
+   * be no scroll trigger. If there is no scroll trigger, then new data will never
+   * be loaded from the API.
+   */
+  _ensureScrollbarsVisible: function () {
+    var windowHeight = Ember.$(window).height();
+    var documentHeight = Ember.$(document).height();
+    var _this = this;
+    Ember.run.schedule('afterRender', function () {
+      if (windowHeight >= documentHeight) {
+        _this.get('_onScroll').bind(_this)();
+      }
+    });
   },
 
   /**
@@ -97,8 +125,8 @@ App.InfiniteScroll = Ember.Mixin.create({
    */
   _onInit: function () {
     var _this = this;
-    // After rendering the screen is complete, set up the page scrolling.
     Ember.run.schedule('afterRender', function () {
+      _this.get('_ensureScrollbarsVisible').bind(_this)();
       _this.get('_setupScrolling').bind(_this)();
     });
   }.on('init'),
